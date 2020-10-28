@@ -21,7 +21,7 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
     
     // –––––– TODO: Update restaurants Array to an array of Restaurants
     var restaurantsArray: [Restaurant] = []
-    var filteredData: [Restaurant]!
+    var filteredData: [Restaurant]! = []
     var searchController: UISearchController!
     var isMoreDataLoading = false
     
@@ -31,7 +31,6 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
         tableView.dataSource = self
         getAPIData()
         filteredData = restaurantsArray
-        tableView.reloadData()
         
         searchController = UISearchController(searchResultsController: nil)
         searchController.searchResultsUpdater = self
@@ -55,7 +54,7 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
             //when user has scrolled past threshold, start data request
             if (scrollView.contentOffset.y > scrollOffsetThreshold && tableView.isDragging) {
                 isMoreDataLoading = true
-                //implement function that grabs additional data from yelp and adds it to current view
+                //getAPIData()
             }
             
         }
@@ -78,7 +77,11 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
     // Protocol Stubs
     // How many cells there will be
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return filteredData.count
+        if filteredData.isEmpty {
+            return restaurantsArray.count
+        } else {
+            return filteredData.count
+        }
     }
     
 
@@ -87,7 +90,14 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
         // Create Restaurant Cell
         let cell = tableView.dequeueReusableCell(withIdentifier: "RestaurantCell") as! RestaurantCell
         
-        let restaurant = filteredData[indexPath.row]
+        let restaurant: Restaurant
+        
+        if filteredData.isEmpty {
+            restaurant = restaurantsArray[indexPath.row]
+        }else{
+            restaurant = filteredData[indexPath.row]
+        }
+         
        
         cell.r = restaurant
         
@@ -98,8 +108,8 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
             filteredData = searchText.isEmpty ? restaurantsArray : restaurantsArray.filter({(r:Restaurant) -> Bool in
                 return r.name.range(of: searchText, options: .caseInsensitive, range: nil, locale: nil) != nil
             })
-            
             self.tableView.reloadData()
+            
         }
         
     }
@@ -112,7 +122,8 @@ class RestaurantsViewController: UIViewController, UITableViewDelegate, UITableV
         //get indexPath of the cell that was tapped
         if let indexPath = tableView.indexPath(for: cell){
             //get the restaurant from the array
-            let r = restaurantsArray[indexPath.row]
+            let r = filteredData.isEmpty ? restaurantsArray[indexPath.row] : filteredData[indexPath.row]
+
             //declare the destination view controller
             let detailVC = segue.destination as! DetailsViewController
             //pass the restaurant object
