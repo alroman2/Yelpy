@@ -1,2 +1,2 @@
 # Yelpy
-An app that lists restaurants in your area
+An low requirement app that displays local restaurants in your area
